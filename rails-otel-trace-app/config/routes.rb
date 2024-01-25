@@ -1,3 +1,4 @@
 Rails.application.routes.draw do
-  get "/my-example-route" => "application#my_example_route"
+  get '/my_route' => 'application#my_route'
+  get '/generate_random_trace_id' => 'application#generate_random_trace_id'
 end

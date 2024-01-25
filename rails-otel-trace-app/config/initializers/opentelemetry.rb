@@ -1,13 +1,28 @@
-
-ENV['OTEL_TRACES_EXPORTER']= 'console'
-
-require 'opentelemetry/sdk'
-
-OpenTelemetry::SDK.configure do |c|
-  c.service_name = 'rails-app-service-name'
+# Small monkey patch to allow "force" opentelemetry to use a trace_id passed
+# as HTTP Header, or generated in another place.
+module OpenTelemetry
+  module Trace
+    class SpanContext
+      def force_trace_id=(new_trace_id)
+        @trace_id = new_trace_id
+      end
+    end
+  end
 end
 
-MyGlobalOpenTelemetryTracer = OpenTelemetry.tracer_provider.tracer('rails-app-trace-name')
+
+## Jaeger config
+ENV['OTEL_TRACES_EXPORTER']= 'otlp' # console | otlp | zipkin
+ENV['OTEL_EXPORTER_OTLP_ENDPOINT']="http://jaeger-docker-container:4318"
+
+require 'opentelemetry/sdk'
+require 'opentelemetry-exporter-otlp'
+
+OpenTelemetry::SDK.configure do |c|
+  c.service_name = 'rails-app'
+end
+
+MyGlobalOpenTelemetryTracer = OpenTelemetry.tracer_provider.tracer('my-tracer-name-here')
 
 =begin
 1 Span pode ter varios attributos
