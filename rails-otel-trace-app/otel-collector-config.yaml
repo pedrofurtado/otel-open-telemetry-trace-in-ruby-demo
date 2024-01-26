@@ -1,0 +1,33 @@
+# Inspired by https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/examples/demo
+receivers:
+  otlp:
+    protocols:
+      http:
+      grpc:
+
+exporters:
+  logging:
+
+  zipkin:
+    endpoint: "http://zipkin-docker-container:9411/api/v2/spans"
+    format: proto
+
+  otlp/jaeger:
+    endpoint: http://jaeger-docker-container:4317
+    tls:
+      insecure: true
+      insecure_skip_verify: true
+
+  otlphttp:
+    traces_endpoint: "http://gtempo-url-here/otlp/v1/traces"
+
+service:
+  telemetry:
+    logs:
+      level: "debug"
+      development: true
+      encoding: "json"
+  pipelines:
+    traces:
+      receivers: [otlp]
+      exporters: [logging, zipkin, otlp/jaeger, otlphttp]

@@ -1,0 +1,33 @@
+version: '3'
+services:
+  rails_app:
+    restart: always
+    image: ruby:3.0.4
+    ports:
+      - 3000:3000
+    working_dir: /app
+    volumes:
+      - ./:/app
+    command: /bin/bash -c "cd /app/rails-otel-trace-app/ && bundle install && bin/rails s -b 0.0.0.0"
+  jaeger-docker-container:
+    restart: always
+    image: jaegertracing/all-in-one:1.53.0
+    ports:
+      - 3009:16686
+    environment:
+      - COLLECTOR_ZIPKIN_HOST_PORT=:9411
+      - COLLECTOR_OTLP_ENABLED=true
+  zipkin-docker-container:
+    image: openzipkin/zipkin:3.0.5
+    restart: always
+    ports:
+      - 3010:9411
+  otel-collector-docker-container:
+    image: otel/opentelemetry-collector:0.93.0
+    restart: always
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./rails-otel-trace-app/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    depends_on:
+      - jaeger-docker-container
+      - zipkin-docker-container

@@ -10,13 +10,27 @@ module OpenTelemetry
   end
 end
 
+exporter = 'otel-collector' # console | otel-collector | jaeger-directly | zipkin-directly
 
-## Jaeger config
-ENV['OTEL_TRACES_EXPORTER']= 'otlp' # console | otlp | zipkin
-ENV['OTEL_EXPORTER_OTLP_ENDPOINT']="http://jaeger-docker-container:4318"
+if exporter == 'jaeger-directly'
+  ## Jaeger config
+  ENV['OTEL_TRACES_EXPORTER']= 'otlp'
+  ENV['OTEL_EXPORTER_OTLP_ENDPOINT']="http://jaeger-docker-container:4318"
+elsif exporter == 'otel-collector'
+  ## OTLP config (Collector send data to GTempo of grafana, for example)
+  ENV['OTEL_TRACES_EXPORTER']= 'otlp'
+  ENV['OTEL_EXPORTER_OTLP_ENDPOINT']="http://otel-collector-docker-container:4318"
+elsif exporter == 'zipkin-directly'
+  #Zipkin config
+  ENV['OTEL_TRACES_EXPORTER'] = 'zipkin'
+  ENV['OTEL_EXPORTER_ZIPKIN_ENDPOINT']="http://zipkin-docker-container:9411"
+elsif exporter == 'console'
+  ENV['OTEL_TRACES_EXPORTER']= 'console'
+end
 
 require 'opentelemetry/sdk'
 require 'opentelemetry-exporter-otlp'
+require 'opentelemetry-exporter-zipkin'
 
 OpenTelemetry::SDK.configure do |c|
   c.service_name = 'rails-app'
