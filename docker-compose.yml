@@ -8,7 +8,16 @@ services:
     working_dir: /app
     volumes:
       - ./:/app
-    command: /bin/bash -c "cd /app/rails-otel-trace-app/ && bundle install && bin/rails s -b 0.0.0.0"
+    command: /bin/bash -c "cd /app/rails-otel-trace-app/ && rm -Rf tmp/pids/server.pid && bundle install && bin/rails s -b 0.0.0.0"
+  sinatra_app:
+    restart: always
+    image: ruby:3.0.4
+    ports:
+      - 3006:9292
+    working_dir: /app
+    volumes:
+      - ./:/app
+    command: /bin/bash -c "cd /app/sinatra-app/ && bundle install && bundle exec rackup --host 0.0.0.0"
   jaeger-docker-container:
     restart: always
     image: jaegertracing/all-in-one:1.53.0
