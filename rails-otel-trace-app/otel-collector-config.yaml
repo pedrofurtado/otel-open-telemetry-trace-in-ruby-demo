@@ -7,6 +7,7 @@ receivers:
 
 exporters:
   logging:
+    verbosity: detailed
 
   zipkin:
     endpoint: "http://zipkin-docker-container:9411/api/v2/spans"
